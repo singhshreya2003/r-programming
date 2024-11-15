@@ -1,0 +1,59 @@
+# Function to create a special "matrix" object that can cache its inverse
+makeCacheMatrix <- function(x = matrix()) {
+  inv <- NULL  # Initialize the cached inverse as NULL
+  
+  # Method to set the matrix and reset the cache if the matrix changes
+  set <- function(y) {
+    x <<- y
+    inv <<- NULL  # Reset the inverse cache when the matrix changes
+  }
+  
+  # Method to get the matrix
+  get <- function() x
+  
+  # Method to set the cached inverse
+  setInverse <- function(inverse) inv <<- inverse
+  
+  # Method to get the cached inverse
+  getInverse <- function() inv
+  
+  # Return a list of the functions
+  list(set = set, get = get, setInverse = setInverse, getInverse = getInverse)
+}
+
+# Function to compute the inverse of the special "matrix" returned by makeCacheMatrix
+cacheSolve <- function(x, ...) {
+  # Try to get the cached inverse
+  inv <- x$getInverse()
+  
+  # If the cached inverse is not NULL, return it
+  if (!is.null(inv)) {
+    message("Getting cached inverse")
+    return(inv)
+  }
+  
+  # If no cached inverse, get the matrix and compute the inverse
+  data <- x$get()
+  inv <- solve(data, ...)  # Compute the inverse using the solve() function
+  
+  # Cache the computed inverse for future use
+  x$setInverse(inv)
+  
+  # Return the computed inverse
+  inv
+}
+
+# Example Usage:
+
+# Create a 2x2 matrix
+mat <- makeCacheMatrix(matrix(c(4, 7, 2, 6), nrow = 2, ncol = 2))
+
+# Compute and cache the inverse
+inv1 <- cacheSolve(mat)
+print("First Inverse:")
+print(inv1)
+
+# Retrieve the cached inverse (no recalculation)
+inv2 <- cacheSolve(mat)
+print("Second (cached) Inverse:")
+print(inv2)
